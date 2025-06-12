@@ -6,6 +6,7 @@ from torch_geometric.data import DataLoader
 from torch_geometric.nn import global_add_pool
 from sklearn.metrics import average_precision_score
 from pytorch_lightning.loggers import WandbLogger
+import numpy as np
 
 from dataset import load_peptides_func
 from model import SpectralGCN       # your existing spectral model class
@@ -67,9 +68,15 @@ class CombinedModel(LightningModule):
         loss_vn   = self.criterion(vn_logits,   y)
         loss      = loss_spec + loss_vn
 
+        # Calculate average precision only if there are positive samples
         vn_probs = torch.sigmoid(vn_logits).detach().cpu().numpy()
         y_true = y.detach().cpu().numpy()
-        avg_prec = average_precision_score(y_true, vn_probs, average='macro')
+        
+        # Check if there are any positive samples in the batch
+        if np.any(y_true):
+            avg_prec = average_precision_score(y_true, vn_probs, average='macro')
+        else:
+            avg_prec = 0.0  # or any other default value you prefer
 
         self.log("train/loss_spec", loss_spec, on_step=True, prog_bar=False, batch_size=batch.y.size(0))
         self.log("train/loss_vn",   loss_vn,   on_step=True, prog_bar=False, batch_size=batch.y.size(0))
@@ -84,7 +91,12 @@ class CombinedModel(LightningModule):
 
         vn_probs = torch.sigmoid(vn_logits).detach().cpu().numpy()
         y_true = y.detach().cpu().numpy()
-        avg_prec = average_precision_score(y_true, vn_probs, average='macro')
+        
+        # Check if there are any positive samples in the batch
+        if np.any(y_true):
+            avg_prec = average_precision_score(y_true, vn_probs, average='macro')
+        else:
+            avg_prec = 0.0  # or any other default value you prefer
 
         self.log("val/loss", val_loss, prog_bar=False, batch_size=batch.y.size(0))
         self.log("val/avg_precision", avg_prec, prog_bar=False, batch_size=batch.y.size(0))
