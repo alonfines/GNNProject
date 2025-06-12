@@ -1,0 +1,8 @@
+in_channels: 9
+hidden_channels: 64
+num_layers: 3
+dropout: 0.3
+k: 4
+num_virtual_nodes: 4
+num_classes: 10
+lr: 0.0001

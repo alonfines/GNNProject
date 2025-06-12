@@ -1,0 +1,50 @@
+LOCAL_RANK: 0 - CUDA_VISIBLE_DEVICES: [0]
+
+  | Name      | Type                     | Params | Mode
+---------------------------------------------------------------
+0 | spectral  | SpectralGCN              | 26.7 K | train
+1 | vn        | ProbabilisticVirtualNode | 19.1 K | train
+2 | criterion | BCEWithLogitsLoss        | 0      | train
+---------------------------------------------------------------
+45.8 K    Trainable params
+0         Non-trainable params
+45.8 K    Total params
+0.183     Total estimated model params size (MB)
+52        Modules in train mode
+0         Modules in eval mode
+Sanity Checking DataLoader 0:   0% 0/2 [00:00<?, ?it/s]
+Traceback (most recent call last):
+  File "/content/drive/.shortcut-targets-by-id/1zLKKz0VPgUjwZpQGsm_yEfsPSAYipY5q/comb/combain.py", line 119, in <module>
+    trainer.fit(model, train_loader, val_loader)
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/trainer.py", line 561, in fit
+    call._call_and_handle_interrupt(
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/call.py", line 48, in _call_and_handle_interrupt
+    return trainer_fn(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/trainer.py", line 599, in _fit_impl
+    self._run(model, ckpt_path=ckpt_path)
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/trainer.py", line 1012, in _run
+    results = self._run_stage()
+              ^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/trainer.py", line 1054, in _run_stage
+    self._run_sanity_check()
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/trainer.py", line 1083, in _run_sanity_check
+    val_loop.run()
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/loops/utilities.py", line 179, in _decorator
+    return loop_run(self, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/loops/evaluation_loop.py", line 145, in run
+    self._evaluation_step(batch, batch_idx, dataloader_idx, dataloader_iter)
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/loops/evaluation_loop.py", line 437, in _evaluation_step
+    output = call._call_strategy_hook(trainer, hook_name, *step_args)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/trainer/call.py", line 328, in _call_strategy_hook
+    output = fn(*args, **kwargs)
+             ^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/pytorch_lightning/strategies/strategy.py", line 412, in validation_step
+    return self.lightning_module.validation_step(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/content/drive/.shortcut-targets-by-id/1zLKKz0VPgUjwZpQGsm_yEfsPSAYipY5q/comb/combain.py", line 85, in validation_step
+    y_true = y.detach().cpu().numpy()
+             ^
+NameError: name 'y' is not defined

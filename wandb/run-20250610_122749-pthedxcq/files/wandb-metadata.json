@@ -1,0 +1,38 @@
+{
+  "os": "Linux-6.1.123+-x86_64-with-glibc2.35",
+  "python": "CPython 3.11.13",
+  "startedAt": "2025-06-10T12:27:49.145143Z",
+  "program": "/content/drive/.shortcut-targets-by-id/1zLKKz0VPgUjwZpQGsm_yEfsPSAYipY5q/comb/combain.py",
+  "codePath": "combain.py",
+  "email": "noamau@post.bgu.ac.il",
+  "root": ".",
+  "host": "fbc8ad227ac9",
+  "executable": "/usr/bin/python3",
+  "codePathLocal": "combain.py",
+  "cpu_count": 1,
+  "cpu_count_logical": 2,
+  "gpu": "Tesla T4",
+  "gpu_count": 1,
+  "disk": {
+    "/": {
+      "total": "120942624768",
+      "used": "49211322368"
+    }
+  },
+  "memory": {
+    "total": "13608370176"
+  },
+  "cpu": {
+    "count": 1,
+    "countLogical": 2
+  },
+  "gpu_nvidia": [
+    {
+      "name": "Tesla T4",
+      "memoryTotal": "16106127360",
+      "cudaCores": 2560,
+      "architecture": "Turing"
+    }
+  ],
+  "cudaVersion": "12.4"
+}
