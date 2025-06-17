@@ -29,19 +29,8 @@ def train(model_type, lr=1e-3, batch_size=128, k=5, max_epochs=100, hidden_chann
     elif model_type == "SpectralGCN":
         model = SpectralGCN(in_channels=in_channels, hidden_channels=hidden_channels,
                             out_channels=out_channels, lr=lr, k=k)
-        monitor_metric = "val_loss"
+        monitor_metric = "val_ap"
         filename = "spectral_gcn_model_best_{epoch:02d}_{val_loss:.4f}"
-
-    elif model_type == "SimpleS2GNN":
-        model = SimpleS2GNN(
-            in_channels=in_channels,
-            hidden_channels=hidden_channels,
-            out_channels=out_channels,
-            num_layers=3,
-            heads=4
-        )
-        monitor_metric = "val_loss"
-        filename = "s2gnn_model_best_{epoch:02d}_{val_loss:.4f}"
 
     else:
         raise ValueError(f"Unknown model type: {model_type}")

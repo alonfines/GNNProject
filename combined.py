@@ -9,14 +9,12 @@ from pytorch_lightning.loggers import WandbLogger
 import numpy as np
 
 from dataset import load_peptides_func
-from model import SpectralGCN       # your existing spectral model class
-from prob_virtual_node import ProbabilisticVirtualNode  # your existing VN model class
-
+from model import SpectralGCN
+from prob_virtual_node import ProbabilisticVirtualNode
 
 class CombinedModel(LightningModule):
     def __init__(
         self,
-        # pass through whatever hyper-params you need:
         in_channels: int,
         hidden_channels: int,
         num_layers: int,
@@ -24,24 +22,27 @@ class CombinedModel(LightningModule):
         k: int,
         num_virtual_nodes: int,
         num_classes: int,
+        train_mode: str = "combined",  # Options: "spectral", "vn", "combined"
         lr: float = 1e-3,
     ):
         super().__init__()
         self.save_hyperparameters()
+        
+        if train_mode not in ["spectral", "vn", "combined"]:
+            raise ValueError("train_mode must be one of: 'spectral', 'vn', 'combined'")
+        self.train_mode = train_mode
 
-        # 2) instantiate your two LightningModules
-        #    - set out_channels=num_classes on SpectralGCN
         self.spectral = SpectralGCN(
             in_channels=in_channels,
             hidden_channels=hidden_channels,
             out_channels=num_classes,
             num_layers=num_layers,
             dropout=dropout,
-            k=k,             # if your SpectralGCN takes k
+            k=k,
             lr=lr
         )
         self.vn = ProbabilisticVirtualNode(
-            in_dim=in_channels,        # same node-feature size
+            in_dim=in_channels,
             hidden_dim=hidden_channels,
             num_virtual_nodes=num_virtual_nodes,
             k=k,
@@ -54,10 +55,14 @@ class CombinedModel(LightningModule):
         self.criterion = nn.BCEWithLogitsLoss()
 
     def forward(self, data):
-        # both expect a single `data` object
-        spec_logits = self.spectral(data.x, data.edge_index, getattr(data, "batch", None))   # [B, num_classes]
-        vn_logits   = self.vn(data)         # [B, num_classes]
-        return spec_logits, vn_logits
+        if self.train_mode == "spectral":
+            return self.spectral(data.x, data.edge_index, getattr(data, "batch", None)), None
+        elif self.train_mode == "vn":
+            return None, self.vn(data)
+        else:
+            spec_logits = self.spectral(data.x, data.edge_index, getattr(data, "batch", None))
+            vn_logits = self.vn(data)
+            return spec_logits, vn_logits
 
     def training_step(self, batch, batch_idx):
         spec_logits, vn_logits = self(batch)
@@ -68,15 +73,9 @@ class CombinedModel(LightningModule):
         loss_vn   = self.criterion(vn_logits,   y)
         loss      = loss_spec + loss_vn
 
-        # Calculate average precision only if there are positive samples
         vn_probs = torch.sigmoid(vn_logits).detach().cpu().numpy()
         y_true = y.detach().cpu().numpy()
-        
-        # Check if there are any positive samples in the batch
-        if np.any(y_true):
-            avg_prec = average_precision_score(y_true, vn_probs, average='macro')
-        else:
-            avg_prec = 0.0  # or any other default value you prefer
+        avg_prec = average_precision_score(y_true, vn_probs, average='macro')
 
         self.log("train/loss_spec", loss_spec, on_step=True, prog_bar=False, batch_size=batch.y.size(0))
         self.log("train/loss_vn",   loss_vn,   on_step=True, prog_bar=False, batch_size=batch.y.size(0))
@@ -85,18 +84,10 @@ class CombinedModel(LightningModule):
         return loss
 
     def validation_step(self, batch, batch_idx):
-        _, vn_logits = self(batch)
+        spec_logits, vn_logits = self(batch)
         y = batch.y.float()
-        val_loss = self.criterion(vn_logits, batch.y.float())
-
-        vn_probs = torch.sigmoid(vn_logits).detach().cpu().numpy()
         y_true = y.detach().cpu().numpy()
-        
-        # Check if there are any positive samples in the batch
-        if np.any(y_true):
-            avg_prec = average_precision_score(y_true, vn_probs, average='macro')
-        else:
-            avg_prec = 0.0  # or any other default value you prefer
+        avg_prec = average_precision_score(y_true, vn_probs, average='macro')
 
         self.log("val/loss", val_loss, prog_bar=False, batch_size=batch.y.size(0))
         self.log("val/avg_precision", avg_prec, prog_bar=False, batch_size=batch.y.size(0))
@@ -106,16 +97,17 @@ class CombinedModel(LightningModule):
         return torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
 
 
+# === Training Script ===
+
 if __name__ == "__main__":
     import wandb
+    from pytorch_lightning.callbacks import ModelCheckpoint
+    from pytorch_lightning import Trainer
 
     wandb_logger = WandbLogger(project="Combined")
 
+    train_loader, val_loader, in_dim, num_classes = load_peptides_func(batch_size=32)
 
-    # load your peptide-func data exactly as you did before:
-    train_loader, val_loader, in_dim, num_classes = load_peptides_func(batch_size=16)
-
-    # instantiate with the same hyperparams you used before
     model = CombinedModel(
         in_channels=in_dim,
         hidden_channels=64,
@@ -124,9 +116,32 @@ if __name__ == "__main__":
         k=4,
         num_virtual_nodes=4,
         num_classes=num_classes,
+        train_mode="combined",  # Options: "spectral", "vn", "combined"
         lr=1e-4
     )
 
-    from pytorch_lightning import Trainer
-    trainer = Trainer(max_epochs=100, accelerator="auto", devices=1, precision=16, logger=wandb_logger)
+    monitor_metric = "val_spectral_avg_precision" if model.train_mode == "spectral" else "val_vn_avg_precision"
+
+    checkpoint_callback = ModelCheckpoint(
+        monitor=monitor_metric,
+        dirpath="GNNProject/checkpoints",
+        filename=f"{model.train_mode}-best-{{epoch:02d}}-{{{monitor_metric}:.4f}}",
+        save_top_k=1,
+        mode="max",
+        save_last=True
+    )
+
+    trainer = Trainer(
+        max_epochs=100,
+        accelerator="auto",
+        devices=1,
+        precision=16,
+        logger=wandb_logger,
+        callbacks=[checkpoint_callback]
+    )
+
     trainer.fit(model, train_loader, val_loader)
+    wandb.finish()
+    print("Training complete.")
+    print(f"Best model saved at: {checkpoint_callback.best_model_path}")
+    print(f"Best {monitor_metric} value: {checkpoint_callback.best_model_score:.4f}")
