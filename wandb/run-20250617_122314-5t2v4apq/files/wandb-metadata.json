@@ -1,0 +1,31 @@
+{
+  "os":  "Windows-11-10.0.26100-SP0",
+  "python":  "CPython 3.12.2",
+  "startedAt":  "2025-06-17T09:23:15.097313Z",
+  "program":  "c:\\Users\\97254\\Desktop\\GNNProject\\combined2.py",
+  "codePath":  "combined2.py",
+  "git":  {
+    "remote":  "https://github.com/alonfines/GNNProject.git",
+    "commit":  "6bf347a6d0799bfdffb03f58a2ceabf946009199"
+  },
+  "email":  "alonfi@post.bgu.ac.il",
+  "root":  ".",
+  "host":  "DESKTOP-L2AGQEH",
+  "executable":  "C:\\Users\\97254\\AppData\\Local\\Programs\\Python\\Python312\\python.exe",
+  "codePathLocal":  "combined2.py",
+  "cpu_count":  4,
+  "cpu_count_logical":  8,
+  "disk":  {
+    "/":  {
+      "total":  "510577373184",
+      "used":  "400613715968"
+    }
+  },
+  "memory":  {
+    "total":  "16850309120"
+  },
+  "cpu":  {
+    "count":  4,
+    "countLogical":  8
+  }
+}
