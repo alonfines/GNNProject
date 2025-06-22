@@ -9,33 +9,33 @@ from sklearn.metrics import average_precision_score
 class ProbabilisticVirtualNode(LightningModule):
     def __init__(
         self,
-        in_dim: int,
-        hidden_dim: int,
-        num_virtual_nodes: int = 4,
-        k: int = 4,
-        num_classes: int = 10,
-        lr: float = 1e-3,
-        num_layers: int = 3,
-        dropout: float = 0.2,
+        in_channels: int,
+        hidden_channels: int,
+        num_virtual_nodes: int,
+        out_channels: int,
+        lr: float ,
+        k: int,
+        num_layers: int ,
+        dropout: float ,
         edge_drop_rate: float = 0.1,
     ):
         super().__init__()
         self.save_hyperparameters()
 
         # projection, sampler MLP
-        self.input_proj = nn.Linear(in_dim, hidden_dim)
+        self.input_proj = nn.Linear(in_channels, hidden_channels)
         self.logit_mlp = nn.Sequential(
-            nn.Linear(in_dim, hidden_dim),
+            nn.Linear(in_channels, hidden_channels),
             nn.ReLU(),
-            nn.Linear(hidden_dim, num_virtual_nodes),
+            nn.Linear(hidden_channels, num_virtual_nodes),
         )
 
         # virtual-node embeddings (shared, but will replicate per graph)
-        self.virtual_nodes = nn.Parameter(torch.randn(num_virtual_nodes, hidden_dim))
+        self.virtual_nodes = nn.Parameter(torch.randn(num_virtual_nodes, hidden_channels))
 
         # stack of GNN layers
         self.convs = nn.ModuleList([
-            GCNConv(hidden_dim, hidden_dim)
+            GCNConv(hidden_channels, hidden_channels)
             for _ in range(num_layers)
         ])
         self.dropout = dropout
@@ -43,9 +43,9 @@ class ProbabilisticVirtualNode(LightningModule):
 
         # final head
         self.head = nn.Sequential(
-            nn.Linear(hidden_dim, hidden_dim),
+            nn.Linear(hidden_channels, hidden_channels),
             nn.ReLU(),
-            nn.Linear(hidden_dim, num_classes),
+            nn.Linear(hidden_channels, out_channels),
         )
 
     @staticmethod
@@ -121,7 +121,7 @@ class ProbabilisticVirtualNode(LightningModule):
     def training_step(self, batch, batch_idx):
         logits = self(batch)
         loss = F.binary_cross_entropy_with_logits(logits, batch.y.float())
-        self.log("train/loss", loss, on_epoch=True, prog_bar=True, batch_size=batch.y.size(0))
+        self.log("train_loss", loss, on_epoch=True, prog_bar=True, batch_size=batch.y.size(0))
         return loss
 
     def validation_step(self, batch, batch_idx):
@@ -136,12 +136,25 @@ class ProbabilisticVirtualNode(LightningModule):
                 ap = average_precision_score(y_true[:, i], y_scores[:, i])
                 ap_list.append(ap)
         avg_ap = sum(ap_list) / len(ap_list)
-        self.log("val/avg_precision", avg_ap, on_epoch=True, prog_bar=True, batch_size=batch.y.size(0))
+        self.log("val_ap", avg_ap, on_epoch=True, prog_bar=True, batch_size=batch.y.size(0))
 
+    def test_step(self, batch, batch_idx):
+        logits = self(batch)
+        y_true = batch.y.cpu().numpy()
+        y_scores = torch.sigmoid(logits).cpu().numpy()
+
+        # compute AP exactly as in the published code
+        ap_list = []
+        for i in range(y_true.shape[1]):
+            if y_true[:, i].sum() > 0 and (y_true[:, i] == 0).sum() > 0:
+                ap = average_precision_score(y_true[:, i], y_scores[:, i])
+                ap_list.append(ap)
+        avg_ap = sum(ap_list) / len(ap_list)
+        self.log("test_ap", avg_ap, on_epoch=True, prog_bar=True, batch_size=batch.y.size(0))
     def configure_optimizers(self):
         opt = torch.optim.Adam(self.parameters(), lr=self.hparams.lr)
         sched = {
             'scheduler': torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode='max'),
-            'monitor': 'val/avg_precision'
+            'monitor': 'val_ap'
         }
         return [opt], [sched]

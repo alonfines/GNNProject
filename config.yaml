@@ -1,0 +1,78 @@
+model_type: "CombinedLoss" # Options: GCN, Vn, SpectralGCN, Combined, CombinedLoss
+
+GCN:
+  in_channels: 32
+  hidden_channels: 64
+  out_channels: 10
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.0001
+  batch_size: 32
+  monitor_metric: "val_ap"
+  patience: 10
+  max_epochs: 100
+  checkpoint_path: "/gpfs0/tamyr/users/alonfi/GNNProject/checkpoints/gcn_model_best_epoch=00_val_ap=0.2522.ckpt"
+
+Vn:
+  in_channels: 32
+  hidden_channels: 64
+  out_channels: 10
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.0001
+  batch_size: 32
+  k: 4
+  monitor_metric: "val_ap"
+  patience: 10
+  max_epochs: 100
+  num_vn: 4
+  checkpoint_path: "/gpfs0/tamyr/users/alonfi/GNNProject/checkpoints/vn_model_best_epoch=00_val_ap=0.3090.ckpt"
+
+SpectralGCN:
+  in_channels: 32
+  hidden_channels: 64
+  out_channels: 10
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.0001
+  batch_size: 32
+  k: 4
+  num_heads: 4
+  monitor_metric: "val_ap"
+  patience: 10
+  max_epochs: 100
+  num_vn: 0
+  checkpoint_path: "/gpfs0/tamyr/users/alonfi/GNNProject/checkpoints/spectral_gcn_model_best_epoch=00_val_loss=0.3573.ckpt"
+  
+
+Combined:
+  in_channels: 32
+  hidden_channels: 64
+  out_channels: 10
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.0001
+  batch_size: 32
+  k: 4
+  num_heads: 4
+  monitor_metric: "val_ap"
+  patience: 10
+  max_epochs: 100
+  num_vn: 4
+  checkpoint_path: "/gpfs0/tamyr/users/alonfi/GNNProject/checkpoints/combined_model_best_epoch=00_val_ap=0.2877.ckpt"
+
+CombinedLoss:
+  in_channels: 32
+  hidden_channels: 64
+  out_channels: 10
+  num_layers: 3
+  dropout: 0.3
+  lr: 0.0001
+  batch_size: 32
+  k: 4
+  num_heads: 4
+  monitor_metric: "val_ap"
+  patience: 10
+  max_epochs: 100
+  num_vn: 4
+  checkpoint_path: "/gpfs0/tamyr/users/alonfi/GNNProject/checkpoints/combined_loss_model_best_epoch=00_val_ap=0.2598.ckpt"

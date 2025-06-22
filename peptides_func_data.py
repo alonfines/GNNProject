@@ -1,7 +1,6 @@
 from torch_geometric.datasets import LRGBDataset
 from torch_geometric.data import DataLoader
 
-
 def load_data(batch_size=4):
     train_dataset = LRGBDataset(root='./data/Peptides-Func', name='Peptides-func', split='train')
     val_dataset = LRGBDataset(root='./data/Peptides-Func', name='Peptides-func', split='val')
