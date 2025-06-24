@@ -17,7 +17,7 @@ Install the required dependencies:
 pip install torch torch-geometric pytorch-lightning wandb pyyaml torchmetrics scikit-learn
 ```
 
-### Training
+### Training and Testing
 
 1. **Configure the model** in `config.yaml`:
    ```yaml
@@ -76,16 +76,6 @@ Hybrid architecture combining multiple GNN approaches for enhanced performance.
 
 ### 5. Combined Loss Model
 Advanced combined model with specialized loss functions for better optimization.
-
-## 📈 Performance
-
-The models are evaluated using Average Precision (AP) on the validation set. Checkpoint files in the `checkpoints/` directory show the best performance achieved:
-
-- **GCN**: Best AP ~0.4144
-- **SpectralGCN**: Best AP ~0.2623 (k=9)
-- **Vn**: Best AP ~0.5427
-- **Combined**: Best AP ~0.3722
-- **CombinedLoss**: Best AP ~0.5021
 
 ## 🔧 Usage Examples
 
@@ -164,8 +154,6 @@ The project uses the **Peptides-Func** dataset from the LRGB benchmark:
 
 The models are evaluated using:
 - **Average Precision (AP)**: Primary metric for multi-label classification
-- **Binary Accuracy**: Classification accuracy
-- **Loss**: Binary cross-entropy loss with logits
 
 ## 🔑 Key Features
 
@@ -197,13 +185,6 @@ The models are evaluated using:
 3. Make your changes
 4. Test with different model configurations
 5. Submit a pull request
-
-## 📄 Acknowledgments
-
-- LRGB benchmark for the Peptides-Func dataset
-- PyTorch Geometric team for the graph neural network library
-- PyTorch Lightning for the training framework
-- Weights & Biases for experiment tracking
 
 ---
 
