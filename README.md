@@ -1,6 +1,11 @@
 # Combining Spectral Filtering and Probabilistic Virtual Nodes to Handle Over-Squashing
 
-## by Alon Fainshtein and Noam Cohen
+by Alon Fainshtein and Noam Cohen
+
+## Relevant Papers
+Sato, Y., Zügner, D., & Günnemann, S. (2024). Spatio-Spectral Graph Neural Networks. NeurIPS 2024. https://arxiv.org/abs/2405.19121
+Sato, Y., Zügner, D., & Günnemann, S. (2023). Implicit Probabilistic Rewiring of Message Passing Neural Networks. ICLR 2023. https://arxiv.org/abs/2405.17311
+
 
 ## 🚀 Quick Start
 
