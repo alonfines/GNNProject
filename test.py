@@ -82,7 +82,7 @@ def test(model_type, lr, batch_size, hidden_channels,dropout,monitor_metric,k,nu
     trainer = pl.Trainer(
         max_epochs=1,
         accelerator="gpu" if torch.cuda.is_available() else "cpu",
-        devices=1 if torch.cuda.is_available() else None,
+        devices=1,
         logger=wandb_logger,
         callbacks=[
             ModelCheckpoint(
