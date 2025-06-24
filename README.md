@@ -76,7 +76,7 @@ The models are evaluated using Average Precision (AP) on the validation set. Che
 - **SpectralGCN**: Best AP ~0.2623 (k=9)
 - **Vn**: Best AP ~0.5427
 - **Combined**: Best AP ~0.3722
-- **CombinedLoss**: Best AP ~0.3421
+- **CombinedLoss**: Best AP ~0.5021
 
 ## 🔧 Usage Examples
 
@@ -174,19 +174,6 @@ The models are evaluated using:
 - **WandB**: Experiment tracking and visualization
 - **Metrics**: Validation AP scores and training curves
 
-## 📄 Model Architecture Details
-
-### GCN Architecture
-```python
-# Forward pass
-for i, conv in enumerate(self.convs[:-1]):
-    x = conv(x, edge_index)
-    x = F.relu(x)
-    x = F.dropout(x, p=self.dropout, training=self.training)
-x = self.convs[-1](x, edge_index)
-x = global_mean_pool(x, batch)  # Graph-level pooling
-```
-
 ### Training Process
 1. **Data Loading**: Peptides-Func dataset with train/val/test splits
 2. **Model Initialization**: Based on configuration
@@ -202,30 +189,12 @@ x = global_mean_pool(x, batch)  # Graph-level pooling
 4. Test with different model configurations
 5. Submit a pull request
 
-## 📄 License
-
-This project is for research purposes. Please cite the original papers if you use this code in your research.
-
 ## 📄 Acknowledgments
 
 - LRGB benchmark for the Peptides-Func dataset
 - PyTorch Geometric team for the graph neural network library
 - PyTorch Lightning for the training framework
 - Weights & Biases for experiment tracking
-
-## 🐛 Troubleshooting
-
-### Common Issues
-
-1. **CUDA out of memory**: Reduce batch size in config.yaml
-2. **Import errors**: Ensure all dependencies are installed
-3. **Dataset download issues**: Check internet connection for automatic dataset download
-
-### Performance Tips
-
-- Use GPU if available for faster training
-- Adjust batch size based on available memory
-- Monitor training with Weights & Biases dashboard
 
 ---
 
