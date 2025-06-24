@@ -1,3 +1,7 @@
+# Combining Spectral Filtering and Probabilistic Virtual Nodes to Handle Over-Squashing
+
+## by Alon Fainshtein and Noam Cohen
+
 ## 🚀 Quick Start
 
 ### Prerequisites
